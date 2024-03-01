@@ -69,7 +69,7 @@ const fetchDataCatagories = (categoryId, sortByView) => {
                     <img class="w-full" src="${video.
                         thumbnail
                     }" alt="Shoes" />
-                    <h6 class="absolute bottom-[40%] right-12">0 hr</h6>
+                    <h6 class="absolute bottom-[40%] right-12" id="time-stamp">${millisecondsToHoursAndMinutes(video.others.posted_date)}</h6>
                 </figure>
                 <div class="card-body">
                     <div class="flex space-x-4 justify-start items-start">
@@ -92,6 +92,15 @@ const fetchDataCatagories = (categoryId, sortByView) => {
                 cardContainer.appendChild(newCard);
             })
         });
+}
+// Milliseconds to hours and minutes
+const timePlaceHolder = document.getElementById('time-stamp');
+console.log(timePlaceHolder);
+const millisecondsToHoursAndMinutes = (mili) => {
+    const minutes = Math.floor(mili / (60 * 1000));
+    const hours = Math.floor(minutes / 60);
+    const hoursAndMinutes = hours % 60;
+    return `${hours} hr and ${hoursAndMinutes} minute`;
 }
 // fetchDataCatagories();
 fetchCatagories();
