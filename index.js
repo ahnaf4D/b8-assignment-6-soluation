@@ -1,8 +1,13 @@
 const btnContainer = document.getElementById('btn-container');
 const cardContainer = document.getElementById('card-container');
 let selectedCatagory = 1001;
+let sortByView = false;
 const errorElement = document.getElementById(`error-element`);
-// console.log(errorElement);
+const sortButton = document.getElementById(`sort-btn`);
+sortButton.addEventListener('click',() => {
+    sortByView = true;
+    fetchDataCatagories(selectedCatagory,sortByView);
+})
 const fetchCatagories = () => {
     const url = `https://openapi.programming-hero.com/api/videos/categories`;
     fetch(url)
@@ -12,34 +17,50 @@ const fetchCatagories = () => {
                 console.log(card);
                 const newButton = document.createElement('button');
                 newButton.innerText = card.category;
-                newButton.classList = `btn btn-ghost bg-slate-700 text-white text-lg`;
+                newButton.classList = `category-btn btn btn-ghost bg-slate-700 text-white text-lg`;
                 // console.log(newButton);
-                newButton.addEventListener('click', () => fetchDataCatagories(card.category_id))
+                newButton.addEventListener('click', () => {
+                    fetchDataCatagories(card.category_id)
+                    const allBtns = document.querySelectorAll('.category-btn');
+                    for (const btn of allBtns) {
+                        btn.classList.remove = ('bg-red-600');
+                    }
+                    newButton.classList.add('bg-red-600');
+                })
                 btnContainer.appendChild(newButton);
             })
         });
 }
-const fetchDataCatagories = (categoryId) => {
+const fetchDataCatagories = (categoryId, sortByView) => {
     console.log(categoryId);
     const url = `https://openapi.programming-hero.com/api/videos/category/${categoryId}`;
     fetch(url)
         .then(res => res.json())
         .then(({ data }) => {
             cardContainer.textContent = ' ';
-            if(data.length == 0){
+            if (sortByView) {
+                data.sort((a, b) => {
+                    const totalViewsStrFirst = a.others?.views;
+                    const totalViewsStrSecond = b.others?.views;
+                    const totalViewFirstNumber = parseFloat(totalViewsStrFirst.replace("K", '')) || 0;
+                    const totalViewSecondNumber = parseFloat(totalViewsStrSecond.replace("K", '')) || 0;
+                    return totalViewSecondNumber - totalViewFirstNumber;
+                })
+            }
+            if (data.length == 0) {
                 errorElement.classList.remove('hidden');
             }
-            else{
+            else {
                 errorElement.classList.add('hidden');
             }
             data.forEach((video) => {
                 console.log(video);
                 let verifiedBadge = ' '
-                if(video.authors[0].verified){
-                    verifiedBadge =  `<img class="w-6 h-6" src="./images/verify.png" alt="">`
+                if (video.authors[0].verified) {
+                    verifiedBadge = `<img class="w-6 h-6" src="./images/verify.png" alt="">`
                 }
-                else{
-                    verifiedBadge =  `<img class="w-6 h-6" src="./images/non-verified.jpg" alt="">`
+                else {
+                    verifiedBadge = `<img class="w-6 h-6" src="./images/non-verified.jpg" alt="">`
                 }
                 const newCard = document.createElement('div');
                 newCard.innerHTML = `
@@ -47,7 +68,7 @@ const fetchDataCatagories = (categoryId) => {
                 <figure class="overflow-hidden h-72">
                     <img class="w-full" src="${video.
                         thumbnail
-                        }" alt="Shoes" />
+                    }" alt="Shoes" />
                     <h6 class="absolute bottom-[40%] right-12">0 hr</h6>
                 </figure>
                 <div class="card-body">
@@ -59,7 +80,7 @@ const fetchDataCatagories = (categoryId) => {
                             <h2 class="card-title">${video.title}</h2>
                             <div class="flex mt-3">
                                 <p class="">${video.authors[0].
-                                    profile_name}</p>
+                        profile_name}</p>
                                ${verifiedBadge}
                             </div>
                             <p class="mt-3">${video.others.views} Views</p>
@@ -74,4 +95,4 @@ const fetchDataCatagories = (categoryId) => {
 }
 // fetchDataCatagories();
 fetchCatagories();
-fetchDataCatagories(selectedCatagory)
+fetchDataCatagories(selectedCatagory, sortByView);
